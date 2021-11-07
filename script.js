@@ -98,11 +98,13 @@ document.onkeydown = (event)=>{
 automatic_translation = null
 
 // function to disable interval
-function disable_translation(){
+function disable_automatic_translation(){
 	clearInterval(automatic_translation)
 }
 
 // function to enable interval
-function enable_translation(){
-	automatic_translation = setInterval(translateAll, 5000)
+function enable_automatic_translation(){
+	automatic_translation = setInterval(translateAll, 2000)
 }
+
+enable_automatic_translation()
