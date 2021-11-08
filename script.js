@@ -4,21 +4,22 @@
 */
 
 const TRANSLATOR_SERVER = "http://127.0.0.1:5000/translate/"
+const USER_LANG = 'es'
 
 // interval to traslate all messages
 automatic_translation = null
 
 // User input box
-input_box = document.querySelector("[placeholder][maxlength='4000']")
+const input_box = document.querySelector("[placeholder][maxlength='4000']")
 
 // Input mode (say, do, story)
-mode_btn= document.querySelector("[style='background-color: rgba(35, 156, 158, 0.75); border-radius: 8px; display: flex; height: 24px; margin: 8px; max-width: 450px; padding: 24px 16px; transition-duration: 0s; width: 120px;']")
+const mode_btn= document.querySelector("[style='background-color: rgba(35, 156, 158, 0.75); border-radius: 8px; display: flex; height: 24px; margin: 8px; max-width: 450px; padding: 24px 16px; transition-duration: 0s; width: 120px;']")
 
 // Submit the input
-submit_btn = document.querySelector("[aria-label='Submit']")
+const submit_btn = document.querySelector("[aria-label='Submit']")
 
 // All adventure content box
-all_msj = document.querySelector("[style='display: flex; margin-top: 2%;']")
+const all_msj = document.querySelector("[style='display: flex; margin-top: 2%;']")
 
 
 // change mode do, say, story
@@ -63,7 +64,7 @@ function sendInput(content){
 	submit_btn.click()
 }
 
-async function translate_text(input, from='es', to='en'){
+async function translate_text(input, from=USER_LANG, to='en'){
 	const url = TRANSLATOR_SERVER + encodeURIComponent(input) +'?from='+from + '&to=' + to
 	return fetch(url).then(res=>res.json()).then(data=>{
 		return data.translation
@@ -71,14 +72,14 @@ async function translate_text(input, from='es', to='en'){
 }
 
 async function translate_input(){
-	const out = await translate_text(input_box.value, from='es', to='en')
+	const out = await translate_text(input_box.value)
 	input_box.value = out
 }
 
 async function translate_element(element){
 	const text = element.innerText
 	try{
-		const out = await translate_text(text, from='en', to='es')
+		const out = await translate_text(text, from='en', to=USER_LANG)
 		//console.log("[+] Translating:", text, "\n   to:", out, )
 		element.innerText = out
 		element.setAttribute('translated', 'true')
@@ -88,6 +89,7 @@ async function translate_element(element){
 }
 
 function translateAll(){
+    // recursive search for all elements to translate
 	function iterate(el){
 		if(el.hasChildNodes()){
 			for(let i=0; i<el.childNodes.length; i++){
@@ -101,7 +103,6 @@ function translateAll(){
 			}
 		}
 	}
-	// iterate over all elements and translate them
 	iterate(all_msj)
 	
 	// Possibly the last element is being generated (writing animation) so the 
@@ -109,6 +110,7 @@ function translateAll(){
 	const count = all_msj.childNodes[0].childElementCount
 	const last_item = all_msj.childNodes[0].childNodes[count-1].childNodes[0]
 	last_item.removeAttribute("translated")
+
 	/*
 	let amount = all_msj.childNodes[0].childElementCount
 	all_msj.childNodes[0].childNodes.forEach((el, idx)=>{
@@ -134,15 +136,32 @@ function enable_automatic_translation(){
 	automatic_translation = setInterval(translateAll, 2000)
 }
 
+// Init main function
 function init(){
-	console.log("Custom Script Initialize!")
-	enable_automatic_translation()
-	// Press 'ShiftRight' to translate input message
-	document.onkeydown = (event)=>{
-		if(event.code=='ShiftRight'){
-			translate_input()
-		}
-	}
+    // try connection with translate server
+    if(input_box == undefined || submit_btn == undefined || mode_btn == undefined || all_msj == undefined){
+        console.log("[+] GUI elements not found! Aborting script execution.")
+        alert("[+] Failed to find GUI elements! Aborting script execution.")
+        return false
+    }
+    console.log("\n[+] Trying connection with translator server...")
+    fetch(TRANSLATOR_SERVER).then(res=>{
+        if(res.status == 200){
+            console.log("[+] Translate server connected!")
+            enable_automatic_translation()
+	        // Press 'ShiftRight' to translate input message
+            document.onkeydown = (event)=>{
+                if(event.code=='ShiftRight'){
+                    translate_input()
+                }
+            }
+            alert("[+]Ready!")
+        }
+    }).catch(e=>{
+        console.log("[x] Error connecting to translate server! " + e)
+        console.log("[+] Trying connection in 5 seconds...")
+        setTimeout(init, 5000)
+    })
 }
-
+console.log("[+] Script loaded!")
 init()
