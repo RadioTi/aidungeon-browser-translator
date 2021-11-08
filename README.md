@@ -13,5 +13,5 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 **Instrucciones para su uso:**
 -      Instalar dependencias *(pip -U deep-translator para modulo de traducción)*
 -      Ejecutar el servidor
--      Inyectar js en el navegador
+-      Inyectar js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam )
 -      Antes de enviar un mensaje asegurarse de presionar 'Shift Right' para traducir la entrada del usuario y cuanto esté lista presionar la tecla espacio ya que necesita un evento del teclado para setearse correctamente, luego ya estaría listo para ser enviado.
