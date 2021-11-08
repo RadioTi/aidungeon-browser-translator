@@ -4,7 +4,8 @@
 */
 
 const TRANSLATOR_SERVER = "http://127.0.0.1:5000/translate/"
-const USER_LANG = 'es'
+var DEFAULT_TRANSLATOR = 'deepl'
+var USER_LANG = 'es'
 
 // interval to traslate all messages
 automatic_translation = null
@@ -21,6 +22,72 @@ const submit_btn = document.querySelector("[aria-label='Submit']")
 // All adventure content box
 const all_msj = document.querySelector("[style='display: flex; margin-top: 2%;']")
 
+function load_switch_btn(){
+    // Switch for change translation service
+    let switch_btn = document.createElement('button')
+    switch_btn.innerText = 'Switch Translator'
+    switch_btn.title = 'Switch Translator service'
+    switch_btn.style.position = 'fixed'
+    switch_btn.style.top = '0px'
+    switch_btn.style.left = 'calc(50% - 50px)'
+    switch_btn.style.zIndex = '9999'
+    switch_btn.style.backgroundColor = '#fff'
+    switch_btn.style.border = '1px solid #000'
+    switch_btn.style.padding = '5px'
+    switch_btn.style.borderRadius = '5px'
+    switch_btn.style.fontSize = '12px'
+    switch_btn.style.cursor = 'pointer'
+    switch_btn.style.margin = '5px'
+    switch_btn.style.color = '#000'
+    switch_btn.style.fontWeight = 'bold'
+    switch_btn.style.textAlign = 'center'
+    switch_btn.style.width = '100px'
+    switch_btn.style.height = '30px'
+
+    // switch  button click event
+    switch_btn.innerText = 'DeepL'
+    switch_btn.onclick = ()=>{
+        if(switch_btn.innerText == 'Google'){
+            switch_btn.innerText = 'DeepL'
+            DEFAULT_TRANSLATOR = 'deepl'
+        }else{
+            switch_btn.innerText = 'Google'
+            DEFAULT_TRANSLATOR = 'google'
+        }
+        console.log("[+] Translator service changed to: " + DEFAULT_TRANSLATOR)
+    }
+    document.body.appendChild(switch_btn)
+}
+
+// Emergent notification 
+const message = document.createElement('div')
+message.style.position = 'fixed'
+message.style.bottom = '0px'
+message.style.left = '0px'
+message.style.zIndex = '9999'
+message.style.backgroundColor = '#fff'
+message.style.border = '1px solid #000'
+message.style.padding = '5px'
+message.style.borderRadius = '5px'
+message.style.fontSize = '12px'
+message.style.color = '#000'
+message.style.fontWeight = 'bold'
+message.style.textAlign = 'center'
+message.style.width = '200px'
+message.style.height = '30px'
+message.style.display = 'none'
+
+document.body.appendChild(message)
+
+function hidde_notification_message(){
+    message.style.display = 'none'
+}
+
+function show_notification_message(content){
+    message.innerText = content
+    message.style.display = 'block'
+    setTimeout(hidde_notification_message, 5000)
+}
 
 // change mode do, say, story
 function changeInputMode(mode){
@@ -65,10 +132,20 @@ function sendInput(content){
 }
 
 async function translate_text(input, from=USER_LANG, to='en'){
-	const url = TRANSLATOR_SERVER + encodeURIComponent(input) +'?from='+from + '&to=' + to
-	return fetch(url).then(res=>res.json()).then(data=>{
-		return data.translation
-	})
+    if(input){
+        const url = TRANSLATOR_SERVER + encodeURIComponent(input) +'?from='+from + '&to=' + to + '&translator=' + DEFAULT_TRANSLATOR
+        return fetch(url).then(res=>{
+            if(res.status == 500){
+                show_notification_message('Problem with the translation service.')
+            }
+            return res.json()
+        }).then(data=>{
+            return decodeURI(data.translation)
+        })
+        // fetch and get status code 
+
+
+    }
 }
 
 async function translate_input(){
@@ -78,14 +155,16 @@ async function translate_input(){
 
 async function translate_element(element){
 	const text = element.innerText
-	try{
-		const out = await translate_text(text, from='en', to=USER_LANG)
-		//console.log("[+] Translating:", text, "\n   to:", out, )
-		element.innerText = out
-		element.setAttribute('translated', 'true')
-	}catch(e){
-		console.log("[x] Error translating")
-	}
+    if(text){
+        try{
+            const out = await translate_text(text, from='en', to=USER_LANG)
+            // console.log("[+] Translating:", text, "\n   to:", out, )
+            element.innerText = out
+            element.setAttribute('translated', 'true')
+        }catch(e){
+            console.log("[x] Error translating")
+        }
+    }
 }
 
 function translateAll(){
@@ -144,6 +223,7 @@ function init(){
         alert("[+] Failed to find GUI elements! Aborting script execution.")
         return false
     }
+
     console.log("\n[+] Trying connection with translator server...")
     fetch(TRANSLATOR_SERVER).then(res=>{
         if(res.status == 200){
@@ -155,7 +235,14 @@ function init(){
                     translate_input()
                 }
             }
-            alert("[+]Ready!")
+            // Press 'ShiftLeft' to force translation 
+            document.onkeyup = (event)=>{
+                if(event.code=='ShiftLeft'){
+                    translateAll()
+                }
+            }
+            load_switch_btn()
+            show_notification_message('Ready to translate!')
         }
     }).catch(e=>{
         console.log("[x] Error connecting to translate server! " + e)
@@ -165,3 +252,4 @@ function init(){
 }
 console.log("[+] Script loaded!")
 init()
+

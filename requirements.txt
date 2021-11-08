@@ -1,3 +1,4 @@
 flask
 flask_cors
 deep-translator
+git+https://github.com/ptrstn/deepl-translate
