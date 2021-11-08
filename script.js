@@ -3,6 +3,11 @@
 *  Github: github.com/hwpoison
 */
 
+const TRANSLATOR_SERVER = "http://127.0.0.1:5000/translate/"
+
+// interval to traslate all messages
+automatic_translation = null
+
 // User input box
 input_box = document.querySelector("[placeholder][maxlength='4000']")
 
@@ -12,10 +17,11 @@ mode_btn= document.querySelector("[style='background-color: rgba(35, 156, 158, 0
 // Submit the input
 submit_btn = document.querySelector("[aria-label='Submit']")
 
-// All adventure content
-all_msj = document.querySelectorAll("span")
+// All adventure content box
+all_msj = document.querySelector("[style='display: flex; margin-top: 2%;']")
 
-// do, say, story
+
+// change mode do, say, story
 function changeInputMode(mode){
 	const actual = mode_btn.textContent
 	if(actual === null){
@@ -57,12 +63,9 @@ function sendInput(content){
 	submit_btn.click()
 }
 
-const TRANSLATOR_SERVER = "http://127.0.0.1:5000/translate/"
-
 async function translate_text(input, from='es', to='en'){
 	const url = TRANSLATOR_SERVER + encodeURIComponent(input) +'?from='+from + '&to=' + to
 	return fetch(url).then(res=>res.json()).then(data=>{
-		console.log(data)
 		return data.translation
 	})
 }
@@ -74,28 +77,52 @@ async function translate_input(){
 
 async function translate_element(element){
 	const text = element.innerText
-	const out = await translate_text(text, from='en', to='es')
-	console.log("[+] Translating:", text, "\n   to:", out, )
-	element.innerText = '\n' + out
-	element.setAttribute('translated', 'true')
-}
-
-function translateAll(){
-	// select all except traslated
-	const elements = document.querySelectorAll("span:not([translated])").forEach((el)=>{
-		translate_element(el)
-	})
-}
-
-// Press 'ShiftRight' to translate input message
-document.onkeydown = (event)=>{
-	if(event.code=='ShiftRight'){
-		translate_input()
+	try{
+		const out = await translate_text(text, from='en', to='es')
+		//console.log("[+] Translating:", text, "\n   to:", out, )
+		element.innerText = out
+		element.setAttribute('translated', 'true')
+	}catch(e){
+		console.log("[x] Error translating")
 	}
 }
 
-// interval to traslate all messages
-automatic_translation = null
+function translateAll(){
+	function iterate(el){
+		if(el.hasChildNodes()){
+			for(let i=0; i<el.childNodes.length; i++){
+				if(el.childNodes[i].hasChildNodes()){
+					iterate(el.childNodes[i])
+				}else{
+					if(el.getAttribute('translated') === null){
+						translate_element(el)
+					}
+				}
+			}
+		}
+	}
+	// iterate over all elements and translate them
+	iterate(all_msj)
+	
+	// Possibly the last element is being generated (writing animation) so the 
+	//'translated' attribute is removed so that it is translated in the next iteration.
+	const count = all_msj.childNodes[0].childElementCount
+	const last_item = all_msj.childNodes[0].childNodes[count-1].childNodes[0]
+	last_item.removeAttribute("translated")
+	/*
+	let amount = all_msj.childNodes[0].childElementCount
+	all_msj.childNodes[0].childNodes.forEach((el, idx)=>{
+		let nodes = el.childNodes
+		if(el.childElementCount > 1){
+			translate_element(nodes[1]) // translate
+		}else{
+			translate_element(nodes[0])  // trasnlate
+		}
+		if(idx == amount-1){
+			el.removeAttribute('translated')
+		}
+	})*/
+}
 
 // function to disable interval
 function disable_automatic_translation(){
@@ -107,4 +134,15 @@ function enable_automatic_translation(){
 	automatic_translation = setInterval(translateAll, 2000)
 }
 
-enable_automatic_translation()
+function init(){
+	console.log("Custom Script Initialize!")
+	enable_automatic_translation()
+	// Press 'ShiftRight' to translate input message
+	document.onkeydown = (event)=>{
+		if(event.code=='ShiftRight'){
+			translate_input()
+		}
+	}
+}
+
+init()
