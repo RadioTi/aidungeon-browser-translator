@@ -5,7 +5,7 @@
 
 const TRANSLATOR_SERVER = "http://127.0.0.1:5000/translate/"
 var DEFAULT_TRANSLATOR = 'deepl'
-var USER_LANG = 'es'
+var USER_LANG = 'spanish' 
 
 // interval to traslate all messages
 automatic_translation = null
@@ -29,7 +29,7 @@ function load_switch_btn(){
     switch_btn.title = 'Switch Translator service'
     switch_btn.style.position = 'fixed'
     switch_btn.style.top = '0px'
-    switch_btn.style.left = 'calc(50% - 50px)'
+    switch_btn.style.left = 'calc(45% - 50px)'
     switch_btn.style.zIndex = '9999'
     switch_btn.style.backgroundColor = '#fff'
     switch_btn.style.border = '1px solid #000'
@@ -59,7 +59,55 @@ function load_switch_btn(){
     document.body.appendChild(switch_btn)
 }
 
-// Emergent notification 
+function load_language_selector(){
+    // multiselect for translation language
+    select_lang = document.createElement('select')
+    select_lang.style.position = 'fixed'
+    select_lang.style.top = '0px'
+    select_lang.style.left = 'calc(53% - 50px)'
+    select_lang.style.height = '30px'
+    select_lang.style.margin = '5px'
+    select_lang.style.borderRadius = '5px'
+    // title 
+    select_lang.title = 'Select origin language'
+
+    // all languages
+    const languages = {
+        'es': 'Spanish',
+        'en': 'English',
+        'fr': 'French',
+        'it': 'Italian',
+        'de': 'German',
+        'pt': 'Portuguese',
+        'ru': 'Russian',
+        'ja': 'Japanese',
+        'ko': 'Korean',
+        'zh': 'Chinese',
+        'ar': 'Arabic',
+        'tr': 'Turkish',
+        'vi': 'Vietnamese',
+        'pl': 'Polish',
+        'nl': 'Dutch',
+        'sv': 'Swedish',
+        'da': 'Danish',
+        'fi': 'Finnish',
+        'no': 'Norwegian',
+        'el': 'Greek',
+        'hi': 'Hindi',
+    }
+    for(let lang in languages){
+        select_lang.innerHTML += `<option value="${lang}">${languages[lang]}</option>`
+    }
+    function on_selection(e){
+        if(e.target.tagName == 'SELECT'){
+            USER_LANG = e.target.value
+        }
+    }
+    select_lang.addEventListener('change', on_selection)
+
+    document.body.appendChild(select_lang)
+}
+
 const message = document.createElement('div')
 message.style.position = 'fixed'
 message.style.bottom = '0px'
@@ -156,7 +204,7 @@ async function translate_input(){
 async function translate_element(element){
 	const text = element.innerText
     if(text){
-        
+        try {
         const out = await translate_text(text, from='en', to=USER_LANG)
         // console.log("[+] Translating:", text, "\n   to:", out, )
         element.innerText = out
@@ -164,6 +212,7 @@ async function translate_element(element){
         }catch(e){
             console.log("[x] Error translating", e)
         }
+	}
 }
 
 function translateAll(){
@@ -241,6 +290,7 @@ function init(){
                 }
             }
             load_switch_btn()
+            load_language_selector()
             show_notification_message('Ready to translate!')
         }
     }).catch(e=>{

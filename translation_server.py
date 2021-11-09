@@ -40,10 +40,7 @@ app.config['TRANSLATOR'] = Translator()
 @app.route('/translate/')
 def home():  # test route
     return '''<h1>Translation Server is Actually Running</h1>''', 200
-
-@app.route('/error')
-def error():
-    return "error", 500
+    
 
 @app.route('/translate/<text>', methods=['GET'])
 def translate(text):
