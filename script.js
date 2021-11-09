@@ -156,15 +156,14 @@ async function translate_input(){
 async function translate_element(element){
 	const text = element.innerText
     if(text){
-        try{
-            const out = await translate_text(text, from='en', to=USER_LANG)
-            // console.log("[+] Translating:", text, "\n   to:", out, )
-            element.innerText = out
-            element.setAttribute('translated', 'true')
+        
+        const out = await translate_text(text, from='en', to=USER_LANG)
+        // console.log("[+] Translating:", text, "\n   to:", out, )
+        element.innerText = out
+        element.setAttribute('translated', 'true')
         }catch(e){
-            console.log("[x] Error translating")
+            console.log("[x] Error translating", e)
         }
-    }
 }
 
 function translateAll(){

@@ -55,7 +55,8 @@ def translate(text):
         return jsonify({'error': 'Missing parameters'}), 400
 
     #  text normalization to preserve chat style conversation
-    text = text.replace('\n', '%0A').replace(':', '=')
+    text = text.replace('\n', '(>)')
+    text = text.replace(':', '=')
 
     translator = app.config['TRANSLATOR']
     try:
@@ -71,10 +72,10 @@ def translate(text):
     if result is None:
         result = text
 
-    translation = result.replace("%0A", "\n")
-    translation = result.replace("=", ":")
-    
-    return jsonify({'translation': translation}), 200
+    result = result.replace("(>)", "\n")
+    result = result.replace("=", ":")
+
+    return jsonify({'translation': result}), 200
 
 
 if __name__ == '__main__':
