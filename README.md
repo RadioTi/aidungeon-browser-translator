@@ -2,8 +2,11 @@
 
 Script para automatizar en tiempo real la traducción en DungeonAI.
 
-- Traducción del historial de la aventura al español
-- Traducción de entrada del usuario del español al ingles para mantener la consistencia.
+- Traducción del historial de la aventura a un idioma en especifico.
+- Traducción de entrada del idioma del usuario al ingles para mantener la consistencia.
+
+AIDungeon funciona mejor en inglés.
+El objetivo del script es interactuar con la narración en el idioma del usuario, que esta se envíe al juego en Inglés y al mismo tiempo el contenido de la aventura que vaya generando, se traduzca al idioma del usuario.
 
 ![](https://play-lh.googleusercontent.com/euTZxOt7w8chhedpujZnAX7F-s5jMACh-ivyf3cCg7nCFwCrnl6HaVG8gOqeu3CgBmJ-)
 
@@ -13,10 +16,11 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 **Instrucciones para su uso:**
 - Instalar dependencias
 - Ejecutar el servidor
-- Inyectar js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam )
-- Antes de enviar un mensaje asegurarse de presionar 'Shift Right' para traducir la entrada del usuario y cuanto esté lista presionar la tecla espacio ya que necesita un evento del teclado para setearse correctamente, luego ya estaría listo para ser enviado.
+- Inyectar el script.js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam )
+- Antes de enviar una interacción por la entrada del usuario, se debe presionar la tecla 'Shift Right' para traducirla y cuanto se haya traducido, presionar la tecla espacio ya que necesita un evento del teclado para setearse correctamente, finalmente enviar.
 
 ### Lenguajes soportados (DeepL y Google)
+Google es el más rápido y DeepL el más lento pero más preciso y semantico.
 
 | Abbreviation | Language   | Writing in own language |
 |--------------|------------|-------------------------|
