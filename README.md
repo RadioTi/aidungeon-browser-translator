@@ -45,3 +45,7 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 | ES           | Spanish    | Español                 |
 | SV           | Swedish    | Svenska                 |
 
+
+
+**Bugs:**
+- Hay que recargar la web y el script cada vez que se inicia un juego nuevo o se carga uno previo.
