@@ -18,7 +18,7 @@ class Translator:
             return self.cache[(text, from_lang, to_lang)]
 
         if service == 'deepl':
-            time.sleep(1.5)
+            time.sleep(0.5)
             result = deepl.translate(
                 source_language=from_lang,
                 target_language=to_lang,
