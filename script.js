@@ -4,63 +4,83 @@
  */
 
 const TRANSLATOR_SERVER = 'http://127.0.0.1:5000/translate/'
+const ADVENTURE_URL_PREFIX = '/main/adventurePlay'
+
+
 let selectedTranslator = 'deepl'
 let selectLanguage = 'spanish' // All adventure will be translated to this language
 
-
+// supported Translators
 const DEEPL = 'DeepL'
+const GOOGLE = 'Google'
 
-// Prepare Selectors
-// User input box
-const userInput = document.querySelector("[placeholder][maxlength='4000']")
-// Submit the input
-const submitInputBtn = document.querySelector("[aria-label='Submit']")
-// All adventure content box
-const adventureContent = document.querySelector("[style='display: flex; margin-top: 2%;']")
-
-let notificationContainer
-
+// signal controller
 let controller = new AbortController();
 let { signal } = controller;
 
-function createSwitchLangButton() {
+const GUI = {
+    elements: {},
+    events: {},
+    observers: {},
+    active: false,
+}
+
+function selectUserInputBox() {
+    // sometimes the webapp conserves the user input box, so we need to select the most recent one
+    const textAreas = document.querySelectorAll("[placeholder][maxlength='4000']")
+    GUI.elements.userInput = textAreas[textAreas.length - 1]
+}
+
+function selectAdventureContent() {
+    GUI.elements.adventureContent = document.querySelector("[style='display: flex; margin-top: 2%;']")
+}
+
+function getOrCreateTranslatorSwitch() {
+    let translatorSwitch = GUI.elements.switchLangButton
+    if (translatorSwitch) {
+        switchLangButton.style.display = 'block'
+        return switchLangButton
+    }
+
     // Switch for change translation service
-    const switchBtn = document.createElement('button')
-    switchBtn.id = 'switch-lang-btn'
-    switchBtn.innerText = 'Switch Translator'
-    switchBtn.title = 'Switch Translator service'
-    switchBtn.style.position = 'fixed'
-    switchBtn.style.top = '0px'
-    switchBtn.style.left = 'calc(45% - 50px)'
-    switchBtn.style.zIndex = '9999'
-    switchBtn.style.backgroundColor = '#fff'
-    switchBtn.style.border = '1px solid #000'
-    switchBtn.style.padding = '5px'
-    switchBtn.style.borderRadius = '5px'
-    switchBtn.style.fontSize = '12px'
-    switchBtn.style.cursor = 'pointer'
-    switchBtn.style.margin = '5px'
-    switchBtn.style.color = '#000'
-    switchBtn.style.fontWeight = 'bold'
-    switchBtn.style.textAlign = 'center'
-    switchBtn.style.width = '100px'
-    switchBtn.style.height = '30px'
+    translatorSwitch = document.createElement('button')
+    translatorSwitch.id = 'switch-lang-btn'
+    translatorSwitch.innerText = 'Switch Translator'
+    translatorSwitch.title = 'Switch Translator service'
+    translatorSwitch.style.position = 'fixed'
+    translatorSwitch.style.top = '0px'
+    translatorSwitch.style.left = 'calc(45% - 50px)'
+    translatorSwitch.style.zIndex = '9999'
+    translatorSwitch.style.backgroundColor = '#fff'
+    translatorSwitch.style.border = '1px solid #000'
+    translatorSwitch.style.padding = '5px'
+    translatorSwitch.style.borderRadius = '5px'
+    translatorSwitch.style.fontSize = '12px'
+    translatorSwitch.style.cursor = 'pointer'
+    translatorSwitch.style.margin = '5px'
+    translatorSwitch.style.color = '#000'
+    translatorSwitch.style.fontWeight = 'bold'
+    translatorSwitch.style.textAlign = 'center'
+    translatorSwitch.style.width = '100px'
+    translatorSwitch.style.height = '30px'
 
     // switch  button click event
-    switchBtn.innerText = DEEPL
-    switchBtn.onclick = () => {
-        switchBtn.innerText = switchBtn.innerText === DEEPL ? 'Google' : DEEPL
-        selectedTranslator = switchBtn.innerText.toLowerCase()
+    translatorSwitch.innerText = DEEPL
+    translatorSwitch.onclick = () => {
+        translatorSwitch.innerText = translatorSwitch.innerText === DEEPL ? GOOGLE : DEEPL
+        selectedTranslator = translatorSwitch.innerText.toLowerCase()
         console.log('[+] Translator service changed to: ' + selectedTranslator)
     }
-    document.body.appendChild(switchBtn)
+    document.body.appendChild(translatorSwitch)
+    GUI.elements.translatorSwitch = translatorSwitch
 }
 
-// rotate icon each 5 seconds
-function rotateIconAnimation() {
-
-}
-function createLangSelector() {
+function getOrCreateLangSelector() {
+    let langSelector = GUI.elements.langSelector
+    if (langSelector) {
+        langSelector.style.display = 'block'
+        return langSelector
+    }
     // multiselect for translation language
     langSelector = document.createElement('select')
     langSelector.style.position = 'fixed'
@@ -104,34 +124,38 @@ function createLangSelector() {
     }
     )
     document.body.appendChild(langSelector)
+    GUI.elements.langSelector = langSelector
 }
 
-function getOrCreateNotificationContainer() {
-    if (notificationContainer) {
-        return notificationContainer
+function getOrCreateNotificationCenter() {
+    let notificationCenter = GUI.elements.notificationCenter
+    if (notificationCenter) {
+        notificationCenter.style.display = 'block'
+        return notificationCenter
     }
-    message = document.createElement('div')
-    message.style.position = 'fixed'
-    message.style.bottom = '0px'
-    message.style.left = '0px'
-    message.style.zIndex = '9999'
-    message.style.backgroundColor = '#fff'
-    message.style.border = '1px solid #000'
-    message.style.padding = '5px'
-    message.style.borderRadius = '5px'
-    message.style.fontSize = '12px'
-    message.style.color = '#000'
-    message.style.fontWeight = 'bold'
-    message.style.textAlign = 'center'
-    message.style.width = '200px'
-    message.style.height = '30px'
-    message.style.display = 'none'
-    document.body.appendChild(message)
-    return message
+    notificationCenter = document.createElement('div')
+    notificationCenter.style.position = 'fixed'
+    notificationCenter.style.bottom = '0px'
+    notificationCenter.style.left = '0px'
+    notificationCenter.style.zIndex = '9999'
+    notificationCenter.style.backgroundColor = '#fff'
+    notificationCenter.style.border = '1px solid #000'
+    notificationCenter.style.padding = '5px'
+    notificationCenter.style.borderRadius = '5px'
+    notificationCenter.style.fontSize = '12px'
+    notificationCenter.style.color = '#000'
+    notificationCenter.style.fontWeight = 'bold'
+    notificationCenter.style.textAlign = 'center'
+    notificationCenter.style.width = '200px'
+    notificationCenter.style.height = '30px'
+    notificationCenter.style.display = 'none'
+    document.body.appendChild(notificationCenter)
+
+    GUI.elements.notificationCenter = notificationCenter
 }
 
 function showNotificationMessage(content, timeout = 5000) {
-    notificationContainer = getOrCreateNotificationContainer()
+    let notificationContainer = getOrCreateNotificationCenter()
     notificationContainer.innerText = content
     notificationContainer.style.display = 'block'
     setTimeout(() => {
@@ -140,7 +164,7 @@ function showNotificationMessage(content, timeout = 5000) {
 }
 
 function hideNotificationMessage() {
-    notificationContainer = getOrCreateNotificationContainer()
+    notificationContainer = getOrCreateNotificationCenter()
     notificationContainer.style.display = 'none'
 }
 
@@ -170,18 +194,6 @@ async function translateSimpleText(from, to, text, abortable = false) {
         return text
     }
     return response.json()
-}
-
-// translate user input to english ( default language of dungeonai)
-async function translateUserInput() {
-    if (userInput.value) {
-        showNotificationMessage('⌛ Translating user input...')
-        const translatedText = await translateSimpleText(selectLanguage, 'en', userInput.value, true)
-        if (translatedText) {
-            userInput.value = translatedText.translation// + ' '
-        }
-        hideNotificationMessage()
-    }
 }
 
 async function translateElement(element) {
@@ -215,19 +227,32 @@ function translateNodes(node) {
 
 // translate adventureContent 
 function translateAdventureContent() {
-    const mainNode = adventureContent
+    const mainNode = GUI.elements.adventureContent
     translateNodes(mainNode)
+}
+
+// translate user input to english ( default language of dungeonai)
+async function translateUserInput() {
+    const userInput_ = GUI.elements.userInput
+    if (userInput_.value) {
+        showNotificationMessage('⌛ Translating user input...', 10000)
+        const translatedText = await translateSimpleText(selectLanguage, 'en', userInput_.value, true)
+        if (translatedText) {
+            userInput_.value = translatedText.translation// + ' '
+        }
+        hideNotificationMessage()
+    }
 }
 
 function createKeyboardEvents() {
     // Press 'ShiftLeft' to force translation
-    document.onkeyup = (event) => {
+    GUI.events.forceTranslation = document.onkeyup = (event) => {
         if (event.code == 'ShiftLeft') {
             translateAdventureContent()
         }
     }
 
-    userInput.addEventListener('keypress', (event) => {
+    GUI.events.abortUserFetch = GUI.elements.userInput.addEventListener('keypress', (event) => {
         // abort only if controller is not aborted
         if (!controller.signal.aborted) {
             controller.abort()
@@ -246,7 +271,6 @@ function debounce(func, timeout = 500) {
     }
 }
 
-// function to enable interval
 function turnAutomaticTranslation() {
     const config = {
         attributes: true,
@@ -255,14 +279,18 @@ function turnAutomaticTranslation() {
         characterData: true
     }
     // for each change in adventureContent
-    new MutationObserver(debounce(() => translateAdventureContent()))
-        .observe(adventureContent, config)
+    const adventureContentObserver = new MutationObserver(debounce(() => translateAdventureContent()))
+    adventureContentObserver.observe(GUI.elements.adventureContent, config)
 
     // for user input
-    new MutationObserver(debounce(() => {
+    const userInputObserver = new MutationObserver(debounce(() => {
         translateUserInput()
     }, 500))
-        .observe(userInput, config)
+    userInputObserver.observe(GUI.elements.userInput, config)
+
+    GUI.observers.adventure = adventureContentObserver
+    GUI.observers.userInput = userInputObserver
+
 }
 
 // test connection with the server
@@ -277,15 +305,48 @@ async function testServerConnection() {
         })
 }
 
-// Initialize script
+function unload() {
+    // disconnect observers
+    if (GUI.observers.adventure) {
+        GUI.observers.adventure.disconnect()
+    }
+    if (GUI.observers.userInput) {
+        GUI.observers.userInput.disconnect()
+    }
+    // remove events listeners
+    if (GUI.events.forceTranslation) {
+        document.onkeyup = null
+    }
+    if (GUI.events.abortUserFetch) {
+        userInput.removeEventListener('keypress', GUI.events.abortUserFetch)
+    }
+    // remove interface elements
+    const notificationCenter = GUI.elements.notificationCenter
+    if (notificationCenter) {
+        notificationCenter.style.display = 'none'
+    }
+
+    const langSelector = GUI.elements.langSelector
+    if (langSelector) {
+        langSelector.style.display = 'none'
+    }
+
+    const translatorSwitch = GUI.elements.translatorSwitch
+    if (translatorSwitch) {
+        translatorSwitch.style.display = 'none'
+    }
+    GUI.active = false
+}
+
+// Initialize translation functions
 async function init() {
-
-    notificationContainer = getOrCreateNotificationContainer()
-
+    getOrCreateNotificationCenter()
+    selectAdventureContent()
+    selectUserInputBox()
     // Check selectors
-    if (userInput == undefined || submitInputBtn == undefined || adventureContent == undefined) {
+    if (GUI.elements.userInput == undefined || GUI.elements.adventureContent == undefined) {
         console.warn('[+] GUI elements not found! Aborting script execution.')
-        showNotificationMessage('Some elements are not found, aborting script execution... 😔')
+        showNotificationMessage('😔 Aborting, some elements are not found, are you already on a adventure view?')
         return false
     }
 
@@ -301,13 +362,27 @@ async function init() {
     }
 
     // Create events and interface
-    createSwitchLangButton()
-    createLangSelector()
+    getOrCreateTranslatorSwitch()
+    getOrCreateLangSelector()
     translateAdventureContent()
     turnAutomaticTranslation()
     createKeyboardEvents()
-    showNotificationMessage('Ready to translate! 😊')
+    GUI.active = true
 
+    showNotificationMessage('Translating! 😊')
 }
-console.log('[+] Script loaded!')
-init()
+
+function autoInit() {
+    // detect if already in a dungeon adventure view
+    const currentUrl = window.location.href
+    const adventureInProgress = currentUrl.includes(ADVENTURE_URL_PREFIX)
+    if (adventureInProgress) {
+        if (!GUI.active)
+            init()
+    } else {
+        unload()
+    }
+}
+
+console.log('[+] Script loaded! Welcome!')
+setInterval(autoInit, 2000)

@@ -12,16 +12,15 @@ El objetivo del script es interactuar con la narración en el idioma del usuario
 
 Las traducciones se efectuan realizando peticiones a un servidor corriendo en python. 
 
-
 **Instrucciones para su uso:**
 - Instalar dependencias
-- Ejecutar el servidor
-- Inyectar el script.js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam )
-- Automaticamente se traduce todo el contenido de la aventura incluida la entrada del usuario.
-- Antes de enviar una narrativa por la entrada, asegurarse de presionar una tecla como la de espacio ya que necesita una interacción del teclado, de lo contrario se enviará el texto no traducido.
+- Ejecutar el servidor (python translation_server.py)
+- Inyectar el script.js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam o bien copiar y pegarlo en el devtools)
+- El script detecta si se está en una aventura y automaticamente comienza a traducir todo el contenido de la aventura incluida la entrada del usuario.
+- Antes de enviar una narrativa por la entrada, luego de que esta se traduzca, asegurarse de presionar una tecla como la de espacio ya que necesita una interacción del teclado, de lo contrario se enviará el texto no traducido.
 
 ### Lenguajes soportados (DeepL y Google)
-Google es el más rápido y DeepL el más lento pero más preciso y semantico.
+Google es el traductor más rápido y DeepL el más lento, pero más preciso y semantico.
 
 | Abbreviation | Language   | Writing in own language |
 |--------------|------------|-------------------------|
@@ -53,5 +52,4 @@ Google es el más rápido y DeepL el más lento pero más preciso y semantico.
 
 
 **Bugs:**
-- Hay que recargar la web y el script cada vez que se inicia un juego nuevo o se carga uno previo.
 - Se debe pulsar una tecla antes de enviar la interacción aunque se haya traducido automaticamente.
