@@ -17,7 +17,8 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 - Instalar dependencias
 - Ejecutar el servidor
 - Inyectar el script.js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam )
-- Antes de enviar una interacción por la entrada del usuario, se debe presionar la tecla 'Shift Right' para traducirla y cuanto se haya traducido, presionar la tecla espacio ya que necesita un evento del teclado para setearse correctamente, finalmente enviar.
+- Automaticamente se traduce todo el contenido de la aventura incluida la entrada del usuario.
+- Antes de enviar una narrativa por la entrada, asegurarse de presionar una tecla como la de espacio ya que necesita una interacción del teclado, de lo contrario se enviará el texto no traducido.
 
 ### Lenguajes soportados (DeepL y Google)
 Google es el más rápido y DeepL el más lento pero más preciso y semantico.
@@ -53,3 +54,4 @@ Google es el más rápido y DeepL el más lento pero más preciso y semantico.
 
 **Bugs:**
 - Hay que recargar la web y el script cada vez que se inicia un juego nuevo o se carga uno previo.
+- Se debe pulsar una tecla antes de enviar la interacción aunque se haya traducido automaticamente.

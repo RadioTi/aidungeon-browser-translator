@@ -5,12 +5,11 @@
 
 const TRANSLATOR_SERVER = 'http://127.0.0.1:5000/translate/'
 let selectedTranslator = 'deepl'
-let selectLanguage = 'spanish'
-// All adventure will be translated to this language
+let selectLanguage = 'spanish' // All adventure will be translated to this language
+
 
 const DEEPL = 'DeepL'
 
-//
 // Prepare Selectors
 // User input box
 const userInput = document.querySelector("[placeholder][maxlength='4000']")
@@ -21,9 +20,13 @@ const adventureContent = document.querySelector("[style='display: flex; margin-t
 
 let notificationContainer
 
+let controller = new AbortController();
+let { signal } = controller;
+
 function createSwitchLangButton() {
     // Switch for change translation service
     const switchBtn = document.createElement('button')
+    switchBtn.id = 'switch-lang-btn'
     switchBtn.innerText = 'Switch Translator'
     switchBtn.title = 'Switch Translator service'
     switchBtn.style.position = 'fixed'
@@ -45,7 +48,7 @@ function createSwitchLangButton() {
 
     // switch  button click event
     switchBtn.innerText = DEEPL
-    switchBtn.onclick = ()=>{
+    switchBtn.onclick = () => {
         switchBtn.innerText = switchBtn.innerText === DEEPL ? 'Google' : DEEPL
         selectedTranslator = switchBtn.innerText.toLowerCase()
         console.log('[+] Translator service changed to: ' + selectedTranslator)
@@ -53,6 +56,10 @@ function createSwitchLangButton() {
     document.body.appendChild(switchBtn)
 }
 
+// rotate icon each 5 seconds
+function rotateIconAnimation() {
+
+}
 function createLangSelector() {
     // multiselect for translation language
     langSelector = document.createElement('select')
@@ -92,7 +99,7 @@ function createLangSelector() {
         langSelector.innerHTML += `<option value="${lang}">${languages[lang]}</option>`
     }
 
-    langSelector.addEventListener('change', (el)=>{
+    langSelector.addEventListener('change', (el) => {
         selectLanguage = el.target.value
     }
     )
@@ -123,37 +130,44 @@ function getOrCreateNotificationContainer() {
     return message
 }
 
-notificationContainer = getOrCreateNotificationContainer()
-
 function showNotificationMessage(content, timeout = 5000) {
     notificationContainer = getOrCreateNotificationContainer()
     notificationContainer.innerText = content
     notificationContainer.style.display = 'block'
-    setTimeout(()=>{
+    setTimeout(() => {
         notificationContainer.style.display = 'none'
-    }
-    , timeout)
+    }, timeout)
 }
 
-function hideNotificationMessage(){
-	notificationContainer = getOrCreateNotificationContainer()
-	notificationContainer.style.display = 'none'
+function hideNotificationMessage() {
+    notificationContainer = getOrCreateNotificationContainer()
+    notificationContainer.style.display = 'none'
 }
 
 // translate text to user language
-async function translateSimpleText(from, to, text) {
+async function translateSimpleText(from, to, text, abortable = false) {
     const url = `${TRANSLATOR_SERVER}${encodeURIComponent(text)}?from=${from}&to=${to}&translator=${selectedTranslator}`
 
     let response
-    try {
-        response = await fetch(url)
-    } catch (e) {
-        showNotificationMessage('Problem with translation server conection. ❌')
-        response = text
+    if (abortable) {
+        controller = new AbortController();
+        signal = controller.signal;
+        response = await fetch(url, { signal }).catch(() => {// do nothing
+        })
+        if (response == undefined) {
+            return false
+        }
+    } else {
+        try {
+            response = await fetch(url)
+        } catch (e) {
+            showNotificationMessage('❌ Problem with translation server conection.')
+        }
     }
+
     if (!response.ok) {
-        showNotificationMessage('Problem with the translation service. ❌')
-        response = text
+        showNotificationMessage('❌ Error while translating text.', response.status)
+        return text
     }
     return response.json()
 }
@@ -161,12 +175,12 @@ async function translateSimpleText(from, to, text) {
 // translate user input to english ( default language of dungeonai)
 async function translateUserInput() {
     if (userInput.value) {
-    	showNotificationMessage('⌛ Translating...')
-        const translatedText = await translateSimpleText(selectLanguage, 'en', userInput.value)
+        showNotificationMessage('⌛ Translating user input...')
+        const translatedText = await translateSimpleText(selectLanguage, 'en', userInput.value, true)
         if (translatedText) {
-            userInput.value = translatedText.translation
-            hideNotificationMessage()
+            userInput.value = translatedText.translation// + ' '
         }
+        hideNotificationMessage()
     }
 }
 
@@ -178,25 +192,15 @@ async function translateElement(element) {
             element.innerText = translatedText.translation
             element.setAttribute('translated', 'true')
         } else {
-            console.warn('Error to translate element.')
+            console.warn('❌ Error to translate element.')
         }
     }
 }
 
-function debounce(func, timeout=500) {
-    let timer;
-    return (...args)=>{
-        clearTimeout(timer);
-        timer = setTimeout(()=>{
-            func.apply(this, args)
-        }
-        , timeout)
-    }
-}
-
+// Translate node tree
 function translateNodes(node) {
     if (node.hasChildNodes()) {
-        node.childNodes.forEach((childNode)=>{
+        node.childNodes.forEach((childNode) => {
             if (childNode.hasChildNodes()) {
                 return translateNodes(childNode)
             }
@@ -215,6 +219,33 @@ function translateAdventureContent() {
     translateNodes(mainNode)
 }
 
+function createKeyboardEvents() {
+    // Press 'ShiftLeft' to force translation
+    document.onkeyup = (event) => {
+        if (event.code == 'ShiftLeft') {
+            translateAdventureContent()
+        }
+    }
+
+    userInput.addEventListener('keypress', (event) => {
+        // abort only if controller is not aborted
+        if (!controller.signal.aborted) {
+            controller.abort()
+        }
+    })
+}
+
+function debounce(func, timeout = 500) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func.apply(this, args)
+        }
+            , timeout)
+    }
+}
+
 // function to enable interval
 function turnAutomaticTranslation() {
     const config = {
@@ -223,49 +254,58 @@ function turnAutomaticTranslation() {
         subtree: true,
         characterData: true
     }
-    new MutationObserver(debounce(()=>translateAdventureContent())).observe(adventureContent, config)
+    // for each change in adventureContent
+    new MutationObserver(debounce(() => translateAdventureContent()))
+        .observe(adventureContent, config)
+
+    // for user input
+    new MutationObserver(debounce(() => {
+        translateUserInput()
+    }, 500))
+        .observe(userInput, config)
+}
+
+// test connection with the server
+async function testServerConnection() {
+    return await fetch(TRANSLATOR_SERVER)
+        .then(response => {
+            if (response) {
+                return true
+            }
+        }).catch(e => {
+            return false
+        })
 }
 
 // Initialize script
-function init() {
+async function init() {
+
+    notificationContainer = getOrCreateNotificationContainer()
 
     // Check selectors
     if (userInput == undefined || submitInputBtn == undefined || adventureContent == undefined) {
         console.warn('[+] GUI elements not found! Aborting script execution.')
-        showNotificationMessage("Some elements are not found, aborting script execution... 😔")
+        showNotificationMessage('Some elements are not found, aborting script execution... 😔')
         return false
     }
 
     // Try connection with the server
-    console.log('\n[+] Trying connection with translator server...')
-    try {
-        fetch(TRANSLATOR_SERVER)
-    } catch (e) {
-        showNotificationMessage("Problem with Translation server connection.😔\nTrying in 5 seconds.")
+    console.log('\n[+] Conecting with traslation server...')
+    const isConnected = await testServerConnection()
+    if (isConnected) {
+        showNotificationMessage('✅ Server connection OK.')
+    } else {
+        showNotificationMessage('❌ Server connection failed.\nTrying in 5 seconds')
         setTimeout(init, 5000)
         return false
     }
 
-    // Prepare events
-
-    // Press 'ShiftRight' to translate input message
-    document.onkeydown = (event)=>{
-        if (event.code == 'ShiftRight') {
-            translateUserInput()
-        }
-    }
-    // Press 'ShiftLeft' to force translation
-    document.onkeyup = (event)=>{
-        if (event.code == 'ShiftLeft') {
-            translateAdventureContent()
-        }
-    }
-
-    // Create interface
+    // Create events and interface
     createSwitchLangButton()
     createLangSelector()
     translateAdventureContent()
     turnAutomaticTranslation()
+    createKeyboardEvents()
     showNotificationMessage('Ready to translate! 😊')
 
 }
