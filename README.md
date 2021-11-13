@@ -12,14 +12,25 @@ El objetivo del script es interactuar con la narración en el idioma del usuario
 
 Las traducciones se efectuan realizando peticiones a un servidor corriendo en python. 
 
-**Instrucciones para su uso:**
-- Instalar dependencias
-- Ejecutar el servidor (python translation_server.py)
-- Inyectar el script.js en el navegador (Pueden usar esta extensión en chrome: https://chrome.google.com/webstore/detail/milkbiaeapddfnpenedfgbfdacpbcbam o bien copiar y pegarlo en el devtools)
-- El script detecta si se está en una aventura y automaticamente comienza a traducir todo el contenido de la aventura incluida la entrada del usuario.
-- Antes de enviar una narrativa por la entrada, luego de que esta se traduzca, asegurarse de presionar una tecla como la de espacio ya que necesita una interacción del teclado, de lo contrario se enviará el texto no traducido.
+## Instrucciones para su uso:
 
-### Lenguajes soportados (DeepL y Google)
+1.**Iniciar servidor de traducción**
+- Instalar dependencias
+- Ejecutar el servidor _(python translation_server.py)_
+
+2.**Instalar extensión en Google Chrome**
+- Ir a _chrome://extensions/_ o _Menu>Más herramientas>Extensiones_.
+- Habilitar el Modo Desarrollador.
+- En 'Cargar descomprimida' selecciónar la carpeta 'chrome-extension'.
+
+La extensión funciona dentro de la web de aidungeon y permitirá con un switch habilitar la traducción automática.
+
+**Observaciones**
+- Antes de enviar una narrativa por la entrada, luego de que esta se traduzca, asegurarse de presionar una tecla como la de espacio ya que necesita una interacción del teclado, de lo contrario se enviará el texto no traducido.
+- Una alternativa a usar la extensión es cargar el script _'chrome-extension/js/translate.js'_ manualmente por el devops o alguna extensión de injección automática.
+
+
+## Lenguajes soportados (DeepL y Google)
 Google es el traductor más rápido y DeepL el más lento, pero más preciso y semantico.
 
 | Abbreviation | Language   | Writing in own language |
@@ -48,7 +59,6 @@ Google es el traductor más rápido y DeepL el más lento, pero más preciso y s
 | SL           | Slovenian  | Slovenščina             |
 | ES           | Spanish    | Español                 |
 | SV           | Swedish    | Svenska                 |
-
 
 
 **Bugs:**

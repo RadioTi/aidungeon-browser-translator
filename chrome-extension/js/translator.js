@@ -3,9 +3,10 @@
  *  Github: github.com/hwpoison
  */
 
+var TURN_ON = false
+
 const TRANSLATOR_SERVER = 'http://127.0.0.1:5000/translate/'
 const ADVENTURE_URL_PREFIX = '/main/adventurePlay'
-
 
 let selectedTranslator = 'deepl'
 let selectLanguage = 'spanish' // All adventure will be translated to this language
@@ -185,7 +186,7 @@ async function translateSimpleText(from, to, text, abortable = false) {
         try {
             response = await fetch(url)
         } catch (e) {
-            showNotificationMessage('❌ Problem with translation server conection.')
+            showNotificationMessage('❌ Problem with translation server connection.')
         }
     }
 
@@ -351,7 +352,7 @@ async function init() {
     }
 
     // Try connection with the server
-    console.log('\n[+] Conecting with traslation server...')
+    console.log('\n[+] Connecting with traslation server...')
     const isConnected = await testServerConnection()
     if (isConnected) {
         showNotificationMessage('✅ Server connection OK.')
@@ -376,13 +377,19 @@ function autoInit() {
     // detect if already in a dungeon adventure view
     const currentUrl = window.location.href
     const adventureInProgress = currentUrl.includes(ADVENTURE_URL_PREFIX)
-    if (adventureInProgress) {
-        if (!GUI.active)
-            init()
+    if (TURN_ON) {
+        if (adventureInProgress) {
+            if (!GUI.active)
+                init()
+        } else {
+            unload()
+        }
     } else {
-        unload()
+        if (adventureInProgress)
+            unload()
     }
 }
 
-console.log('[+] Script loaded! Welcome!')
+console.log('[+] AIDungeon Translator loaded, Welcome!')
+
 setInterval(autoInit, 2000)
