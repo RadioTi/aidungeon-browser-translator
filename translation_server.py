@@ -42,6 +42,12 @@ def home():  # test route
     return '''<h1>Translation Server is Actually Running</h1>''', 200
     
 
+def filter_text(text, tokens):
+    text = text
+    for (char, to) in tokens.items():
+        text = text.replace(char, to)
+    return text
+
 @app.route('/translate/<text>', methods=['GET'])
 def translate(text):
     from_lang = request.args.get('from')
@@ -51,10 +57,7 @@ def translate(text):
     if from_lang is None or to_lang is None or text is None:
         return jsonify({'error': 'Missing parameters'}), 400
 
-    #  text normalization to preserve chat style conversation
-    text = text.replace('\n', '(>)')
-    text = text.replace(':', '=')
-
+    text = filter_text(text, {'\n': '(>)', ':': '='})
     translator = app.config['TRANSLATOR']
     try:
         result = translator.translate(
@@ -69,8 +72,7 @@ def translate(text):
     if result is None:
         result = text
 
-    result = result.replace("(>)", "\n")
-    result = result.replace("=", ":")
+    result = filter_text(result, {'(>)': '\n', '=': ':'})
 
     return jsonify({'translation': result}), 200
 
