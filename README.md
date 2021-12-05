@@ -15,8 +15,8 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 ## Instrucciones para su uso:
 
 1.**Iniciar servidor de traducción**
-- Instalar dependencias
-- Ejecutar el servidor _(python translation_server.py)_
+- Instalar dependencias _(execute: pip install -r requirements.txt)_
+- Ejecutar el servidor _(execute: python translation_server.py)_
 
 2.**Instalar extensión en Google Chrome**
 - Ir a _chrome://extensions/_ o _Menu>Más herramientas>Extensiones_.
