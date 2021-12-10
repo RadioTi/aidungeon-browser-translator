@@ -63,3 +63,4 @@ Google es el traductor más rápido y DeepL el más lento, pero más preciso y s
 
 **Bugs:**
 - Se debe pulsar una tecla antes de enviar la interacción aunque se haya traducido automaticamente.
+- Puede que DeepL genere un internal error por hacer demasiadas peticiones en un corto tiempo, esto se puede mitigar añadiendo un delay intencional en el servidor o bien cambiando el traductor de Google.
