@@ -3,10 +3,13 @@
  *  Github: github.com/hwpoison
  */
 
-var TURN_ON = false
+var TURN_ON = true
 
 const TRANSLATOR_SERVER = 'http://127.0.0.1:5000/translate/'
 const ADVENTURE_URL_PREFIX = '/main/adventurePlay'
+
+const USER_INPUT_SELECTOR = "[placeholder][maxlength='4000']"
+const ADVENTURE_CONTENT_SELECTOR = "[aria-label='Story']"
 
 let selectedTranslator = 'deepl'
 let selectLanguage = 'spanish' // All adventure will be translated to this language
@@ -28,12 +31,12 @@ const GUI = {
 
 function selectUserInputBox() {
     // sometimes the webapp conserves the user input box, so we need to select the most recent one
-    const textAreas = document.querySelectorAll("[placeholder][maxlength='4000']")
+    const textAreas = document.querySelectorAll(USER_INPUT_SELECTOR)
     GUI.elements.userInput = textAreas[textAreas.length - 1]
 }
 
 function selectAdventureContent() {
-    GUI.elements.adventureContent = document.querySelector("[style='display: flex; margin-top: 2%;']")
+    GUI.elements.adventureContent = document.querySelector(ADVENTURE_CONTENT_SELECTOR)
 }
 
 function getOrCreateTranslatorSwitch() {
@@ -346,7 +349,7 @@ async function init() {
     selectUserInputBox()
     // Check selectors
     if (GUI.elements.userInput == undefined || GUI.elements.adventureContent == undefined) {
-        console.warn('[+] GUI elements not found! Aborting script execution.')
+        console.warn('[+] GUI elements not found! (bad view or aidungeon gui update) Aborting script execution.')
         showNotificationMessage('😔 Aborting, some elements are not found, are you already on a adventure view?')
         return false
     }
