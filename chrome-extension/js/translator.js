@@ -96,6 +96,7 @@ function getOrCreateLangSelector() {
     langSelector.title = 'Select origin language'
 
     // all supported languages
+    // lang-codes reference: https://cloud.google.com/translate/docs/languages
     const languages = {
         es: 'Spanish',
         en: 'English',
@@ -106,7 +107,8 @@ function getOrCreateLangSelector() {
         ru: 'Russian',
         ja: 'Japanese',
         ko: 'Korean',
-        zh: 'Chinese',
+        'zh-TW': 'Chinese (traditional)',
+        'zh-CN': 'Chinese (simplified)',
         ar: 'Arabic',
         tr: 'Turkish',
         vi: 'Vietnamese',
@@ -195,8 +197,9 @@ async function translateSimpleText(from, to, text, abortable = false) {
 
     if (!response.ok) {
         showNotificationMessage('❌ Error while translating text.', response.status)
-        return text
+        return false
     }
+
     return response.json()
 }
 
@@ -204,24 +207,25 @@ async function translateElement(element) {
     const text = element.innerText
     if (text.length > 2) {
         const translatedText = await translateSimpleText('en', selectLanguage, text)
-        if (translatedText) {
+        if (translatedText!=false) {
             element.innerText = translatedText.translation
             element.setAttribute('translated', 'true')
         } else {
             console.warn('❌ Error to translate element.')
+            showNotificationMessage('❌ Error to translate element.', response.status)
         }
     }
 }
 
 // Translate node tree
-function translateNodes(node) {
+function translateNodes(node, forceTranslation=false) {
     if (node.hasChildNodes()) {
         node.childNodes.forEach((childNode) => {
             if (childNode.hasChildNodes()) {
-                return translateNodes(childNode)
+                return translateNodes(childNode, forceTranslation)
             }
             const wasTranslated = node.getAttribute('translated') !== 'true'
-            if (wasTranslated) {
+            if (wasTranslated || forceTranslation==true) {
                 translateElement(node)
             }
         }
@@ -230,9 +234,9 @@ function translateNodes(node) {
 }
 
 // translate adventureContent 
-function translateAdventureContent() {
+function translateAdventureContent(force=false) {
     const mainNode = GUI.elements.adventureContent
-    translateNodes(mainNode)
+    translateNodes(mainNode, force)
 }
 
 // translate user input to english ( default language of dungeonai)
@@ -241,7 +245,7 @@ async function translateUserInput() {
     if (userInput_.value) {
         showNotificationMessage('⌛ Translating user input...', 10000)
         const translatedText = await translateSimpleText(selectLanguage, 'en', userInput_.value, true)
-        if (translatedText) {
+        if (translatedText!=false) {
             userInput_.value = translatedText.translation// + ' '
         }
         hideNotificationMessage()
@@ -252,7 +256,7 @@ function createKeyboardEvents() {
     // Press 'ShiftLeft' to force translation
     GUI.events.forceTranslation = document.onkeyup = (event) => {
         if (event.code == 'ShiftLeft') {
-            translateAdventureContent()
+            translateAdventureContent(true)
         }
     }
 
