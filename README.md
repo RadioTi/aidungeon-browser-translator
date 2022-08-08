@@ -19,6 +19,10 @@ Las traducciones se efectuan realizando peticiones a un servidor corriendo en py
 - Ejecutar el servidor _(execute: python translation_server.py)_
 
 2.**Instalar extensión en Google Chrome**
+Desde la Chrome Store:
+- Ir a https://chrome.google.com/webstore/detail/aidungeontranslator/kdjienkokppmeggedaoochjpnjibckdh?hl=es-419&authuser=0
+
+Manualmente:
 - Ir a _chrome://extensions/_ o _Menu>Más herramientas>Extensiones_.
 - Habilitar el Modo Desarrollador.
 - En 'Cargar descomprimida' selecciónar la carpeta 'chrome-extension'.
