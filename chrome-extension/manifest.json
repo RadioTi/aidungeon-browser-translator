@@ -22,7 +22,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.aidungeon.io/*"
+        "https://*.aidungeon.com/*"
       ],
       "js": [
         "js/translator.js"
